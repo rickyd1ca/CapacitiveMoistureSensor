@@ -18,7 +18,7 @@ limitations under the License.
 CapacitiveMoistureSensor::CapacitiveMoistureSensor(int pin) {
   lastReadValueTime = 0;
   lastValue = 0;
-  pin = pin;
+  this->pin = pin;
   soilHumidity = CapacitiveMoistureSensor::SOIL_HUMIDITY_ERROR;
   numberErraticRead = 0;
 }
