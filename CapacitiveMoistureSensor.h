@@ -27,12 +27,14 @@ class CapacitiveMoistureSensor
       SOIL_HUMIDITY_ERROR
     } Humidity;
 
+    CapacitiveMoistureSensor();
     CapacitiveMoistureSensor(int pin);
     void read();
     Humidity getMoisture();
     float getMoistureLevel();
     uint16_t getValue();
     const char* getStateStr();
+    void setMoisture(Humidity moisture);
 
   private:
     static const uint16_t HUMIDITY_WET_THREASHOLD = 423;

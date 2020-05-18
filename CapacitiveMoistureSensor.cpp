@@ -15,12 +15,22 @@ limitations under the License.
 */
 #include "CapacitiveMoistureSensor.h"
 
-CapacitiveMoistureSensor::CapacitiveMoistureSensor(int pin) {
-  lastReadValueTime = 0;
-  lastValue = 0;
-  this->pin = pin;
-  soilHumidity = CapacitiveMoistureSensor::SOIL_HUMIDITY_ERROR;
-  numberErraticRead = 0;
+CapacitiveMoistureSensor::CapacitiveMoistureSensor(int _pin) :
+  lastReadValueTime(0),
+  lastValue(0),
+  pin(_pin),
+  soilHumidity(CapacitiveMoistureSensor::SOIL_HUMIDITY_ERROR),
+  numberErraticRead(0)
+{
+}
+
+CapacitiveMoistureSensor::CapacitiveMoistureSensor() :
+    lastReadValueTime(0),
+    lastValue(0),
+    pin(0),
+    soilHumidity(CapacitiveMoistureSensor::SOIL_HUMIDITY_ERROR),
+    numberErraticRead(0) 
+{
 }
 
 void CapacitiveMoistureSensor::read() {
@@ -87,4 +97,8 @@ const char* CapacitiveMoistureSensor::getStateStr() {
   };
 
   return stateStr[soilHumidity];
+}
+
+void CapacitiveMoistureSensor::setMoisture(Humidity moisture) {
+  soilHumidity = moisture;
 }
