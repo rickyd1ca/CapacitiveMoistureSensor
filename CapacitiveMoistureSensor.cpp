@@ -15,21 +15,13 @@ limitations under the License.
 */
 #include "CapacitiveMoistureSensor.h"
 
-CapacitiveMoistureSensor::CapacitiveMoistureSensor(int _pin) :
+CapacitiveMoistureSensor::CapacitiveMoistureSensor(InputInterface& _input) :
   lastReadValueTime(0),
   lastValue(0),
-  pin(_pin),
+  lastValidValue(0),
+  input(_input),
   soilHumidity(CapacitiveMoistureSensor::SOIL_HUMIDITY_ERROR),
   numberErraticRead(0)
-{
-}
-
-CapacitiveMoistureSensor::CapacitiveMoistureSensor() :
-    lastReadValueTime(0),
-    lastValue(0),
-    pin(0),
-    soilHumidity(CapacitiveMoistureSensor::SOIL_HUMIDITY_ERROR),
-    numberErraticRead(0) 
 {
 }
 
@@ -38,7 +30,7 @@ void CapacitiveMoistureSensor::read() {
 
   if (currentMillis - lastReadValueTime > CapacitiveMoistureSensor::HUMIDITY_POLL_PERIOD) {
     // Read current value
-    uint16_t currentValue = analogRead(pin);
+    uint16_t currentValue = input.read();
     lastReadValueTime = currentMillis;
 
     if (abs(lastValue - currentValue) < 20 &&
@@ -47,14 +39,16 @@ void CapacitiveMoistureSensor::read() {
       if (numberErraticRead > 0) {
         numberErraticRead--;
       }
-      // 2 values are close enough, evaluate the state
-      // Reset number of erratic reads
-      if (currentValue < CapacitiveMoistureSensor::HUMIDITY_WET_THREASHOLD) {
-        soilHumidity = CapacitiveMoistureSensor::SOIL_HUMIDITY_WET;
-      } else if (currentValue < CapacitiveMoistureSensor::HUMIDITY_HUMID_THREASHOLD) {
-        soilHumidity = CapacitiveMoistureSensor::SOIL_HUMIDITY_HUMID;
-      } else {
-        soilHumidity = CapacitiveMoistureSensor::SOIL_HUMIDITY_DRY;
+      if (numberErraticRead == 0) {
+        // 2 values are close enough, evaluate the state
+        if (currentValue < CapacitiveMoistureSensor::HUMIDITY_WET_THREASHOLD) {
+          soilHumidity = CapacitiveMoistureSensor::SOIL_HUMIDITY_WET;
+        } else if (currentValue < CapacitiveMoistureSensor::HUMIDITY_HUMID_THREASHOLD) {
+          soilHumidity = CapacitiveMoistureSensor::SOIL_HUMIDITY_HUMID;
+        } else {
+          soilHumidity = CapacitiveMoistureSensor::SOIL_HUMIDITY_DRY;
+        }
+        lastValidValue = currentValue;
       }
     } else {
       numberErraticRead++;
@@ -78,22 +72,22 @@ float CapacitiveMoistureSensor::getMoistureLevel() {
     return 0;
   }
 
-  uint32_t normalizedValue = CapacitiveMoistureSensor::HUMIDITY_MAX_VALUE - lastValue;
+  uint32_t normalizedValue = CapacitiveMoistureSensor::HUMIDITY_MAX_VALUE - lastValidValue;
   float moisturePercentage = (float)normalizedValue / (float)(CapacitiveMoistureSensor::HUMIDITY_MAX_VALUE - CapacitiveMoistureSensor::HUMIDITY_MIN_VALUE);
 
   return moisturePercentage * 100;
 }
 
 uint16_t CapacitiveMoistureSensor::getValue() {
-  return lastValue;
+  return lastValidValue;
 }
 
 const char* CapacitiveMoistureSensor::getStateStr() {
   static const char *stateStr[] = {
-    "WET",
-    "HUM",
-    "DRY",
-    "ERR"
+    "W",
+    "H",
+    "D",
+    "E"
   };
 
   return stateStr[soilHumidity];

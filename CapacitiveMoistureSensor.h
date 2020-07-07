@@ -16,6 +16,7 @@ limitations under the License.
 #ifndef CapacitiveMoistureSensor_h
 #define CapacitiveMoistureSensor_h
 #include "Arduino.h"
+#include "InputInterface.h"
 
 class CapacitiveMoistureSensor
 {
@@ -27,8 +28,7 @@ class CapacitiveMoistureSensor
       SOIL_HUMIDITY_ERROR
     } Humidity;
 
-    CapacitiveMoistureSensor();
-    CapacitiveMoistureSensor(int pin);
+    CapacitiveMoistureSensor(InputInterface& _input);
     void read();
     Humidity getMoisture();
     float getMoistureLevel();
@@ -37,15 +37,16 @@ class CapacitiveMoistureSensor
     void setMoisture(Humidity moisture);
 
   private:
-    static const uint16_t HUMIDITY_WET_THREASHOLD = 423;
-    static const uint16_t HUMIDITY_HUMID_THREASHOLD = 516;
+    static const uint16_t HUMIDITY_WET_THREASHOLD = 400;
+    static const uint16_t HUMIDITY_HUMID_THREASHOLD = 480;
     static const uint16_t HUMIDITY_POLL_PERIOD = 200;
     static const uint16_t HUMIDITY_MAX_VALUE = 700;
     static const uint16_t HUMIDITY_MIN_VALUE = 320;
 
     unsigned long lastReadValueTime;
     uint16_t lastValue;
-    uint8_t pin;
+    uint16_t lastValidValue;
+    InputInterface& input;
     Humidity soilHumidity;
     uint8_t numberErraticRead;
 };
